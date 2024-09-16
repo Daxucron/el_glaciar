@@ -1,0 +1,24 @@
+1.Contemplar la herencia y la composición para la modificación de tablas en la base de datos
+2. ------------------- Crear interfaz conexión pingüino para poder conectar a través de un pull de conexiones
+3. ------------------- nuevo atributo de penguinAtribitte donde se podrá identificar una clave foranea
+4. Entender la fiderencia entre setAttribute y getParamiter del servlet
+5. Leer la base de datos y crearme las clases java para poder manejar la bse de datos
+6. --------------- cambiar el findby id a que devuelva solo un objeto en lugar de un array
+--------------- El create ya acepta fechas tipo LocalDateTime y array de bytes
+
+7. 1.1.1 Relacion de composicion vaga y alterada (claves foraneas y deteccion de entities)
+
+Primer paso será hacer una composición sencilla, el segundo será con arrays o listas
+en composicion primero mirar si hay una foreign que coincida y si no usar directamente la pk como foreign
+
+IMPORTANTE, al crear un nuevo registro con un autoincrement obtener de vuelta el nuevo valor de la pk y actualizar nuestros items
+
+crear primero los elementos de dentro o los de fuera?
+
+Si añado informacion en la anotacion de foreignkey como la clase a la que hace referencia podria actualizar las entidades que pertenezcan a una mayor.
+
+Hay un problema con el statement que no devuelve las generatedKeys, añadir return al set Foreign y set Penguin
+
+Cuando hay una entidad en un create que ya existe en la base de datos, crear/modificar/dar error?
+
+Que se puedan aádir listas a la bse de datos que no conecten con entidades, es decir, que sean valores como tal
