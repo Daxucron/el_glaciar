@@ -2,10 +2,8 @@ package glaciar;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,13 +26,13 @@ public class PenguinDaoTest {
 		Category catA = new Category(1,"Java");
 		Category catB = new Category(1,"Photoshop");
 		
-		int num = pd.create(catA);		
-		num+=pd.create(catB);
+		int res = pd.create(catA);		
+		res+=pd.create(catB);
 		
 		pd.delete(catA);
 		pd.delete(catB);
 		
-		assertEquals(2,num);
+		assertEquals(2,res);
 	}	
 	
 	@Test
@@ -48,9 +46,14 @@ public class PenguinDaoTest {
 	}
 	
 	@Test
-	public void testUpdate()
+	public void testUpdate() throws SQLException
 	{
 		Category catA = new Category(1,"Java 2");
+		int res = pd.update(catA);
+		catA.setName("Java");
+		pd.update(catA);
+		assertEquals(1,res);
+		
 	}
 	
 }
