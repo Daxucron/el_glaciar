@@ -31,6 +31,11 @@ public class Main {
 	{			
 		PenguinDao pd = new PenguinDao(new ConnectionExamenes());
 		Exam[] exams = pd.findAll(Exam.class);
+		
+		for(Exam e: exams)
+		{
+			System.out.println(e);
+		}
 	}
 	
 	private static void testCrud()

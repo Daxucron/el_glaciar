@@ -29,7 +29,21 @@ public class Category
 	}
 	public void setName(String name) {
 		this.name = name;
-	}	
+	}
+	
+	@Override
+	public boolean equals(Object obj) 
+	{		
+		if(obj instanceof Category)
+		{
+			Category cat = (Category) obj;
+			if(cat.getCategoryId() == categoryId && cat.getName().equals(name))
+			{
+				return true;
+			}
+		}		
+		return false;
+	}
 	
 	@Override
 	public String toString() {

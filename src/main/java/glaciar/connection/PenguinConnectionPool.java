@@ -36,6 +36,7 @@ public abstract class PenguinConnectionPool implements PenguinConnection {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
+			System.out.println("No se ha encontrado el driver");
 			e.printStackTrace();			
 		}
 	}

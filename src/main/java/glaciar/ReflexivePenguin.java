@@ -287,8 +287,8 @@ public class ReflexivePenguin
 	}
 
 	public static <T> void addRelations(T obj, T[] objs2) {
-		// TODO Añadir el valor al atributo relacion
-		
+		// TODO Añadir el valor al atributo relacion jy
+		 
 	}	
 }
 	
