@@ -74,6 +74,17 @@ public class Exam {
 		this.level = level;
 	}	
 	
+	
+	
+	public List<Question> getQuestions() {
+		return questions;
+	}
+	public void setQuestions(List<Question> questions) {
+		this.questions = questions;
+	}
+	public int getCategoryId() {
+		return categoryId;
+	}
 	@Override
 	public String toString() {
 		StringBuilder msg = new StringBuilder();

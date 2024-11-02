@@ -71,6 +71,11 @@ public class Question
 	{
 		this.options = options;
 	}
+	public Option[] getOptions() {
+		return options;
+	}
+	
+	
 	
 	
 	

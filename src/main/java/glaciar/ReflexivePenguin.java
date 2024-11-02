@@ -1,8 +1,8 @@
 package glaciar;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import glaciar.annotations.PenguinAttribute;
@@ -62,9 +58,9 @@ public class ReflexivePenguin
         return Arrays.stream(fields)
             .filter(ReflexivePenguinFilters::filterIgnores)
             .flatMap(field->{
-                field.setAccessible(true);
+                
                 try {
-                    Object value = field.get(obj);
+                    Object value = getFieldValue(field, obj);
                     if (value == null) {
                         return Stream.empty();
                     }
@@ -90,11 +86,9 @@ public class ReflexivePenguin
                         .map(element->new PenguinObject(element)); // Pass each element to PenguinObject constructor 
                     
 
-                } catch (IllegalArgumentException | IllegalAccessException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     return Stream.empty();
-                } finally {
-                    field.setAccessible(false);
                 }
             })            
             .toArray(PenguinObject[]::new);
@@ -116,9 +110,7 @@ public class ReflexivePenguin
             // FILTRO QUE DESCARTA ARRAYS Y COLLECTIONS
             .filter(field -> {
             	try {
-                    field.setAccessible(true);
-                    Object value = field.get(obj);
-                    field.setAccessible(false);
+                    Object value = getFieldValue(field, obj);
                     if(value != null && (value.getClass().isArray() || value instanceof Collection<?>) && !(value instanceof byte[]))
                     {
                     	return false;
@@ -127,30 +119,34 @@ public class ReflexivePenguin
                     	return true;
                     }
                     
-                } catch (IllegalAccessException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     return false;
                 }
             })
             .map(field -> {
-                field.setAccessible(true);
+                
                 PenguinAttribute pa = field.getAnnotation(PenguinAttribute.class);
                 PenguinField pf = null;
                 try {
+                	Object value = getFieldValue(field, obj);
 	                if(pa != null)
 	                {                
-	                	pf = new PenguinField(field.getName(), field.get(obj), pa.penguinKey(), pa.unique(), pa.autoIncrement(), pa.foreignKey());	
+	                	pf = new PenguinField(field.getName(), value, pa.penguinKey(), pa.unique(), pa.autoIncrement(), pa.foreignKey());	
 						
 	                }else {
-						pf = new PenguinField(field.getName(),field.get(obj));
+						pf = new PenguinField(field.getName(),value);
 	                }
                 } catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				
-				field.setAccessible(false);
+				
 				return pf; // Crea una entrada del mapa
             })
             .toArray(PenguinField[]::new); // Colecciona en un array de PenguinField
@@ -183,19 +179,16 @@ public class ReflexivePenguin
 	                
 	                for (Field campo : campos) {
 	                    PenguinAttribute anotacion = campo.getAnnotation(PenguinAttribute.class);
-	                    if (anotacion == null || !anotacion.ignore()) {
-	                        campo.setAccessible(true);	                        
+	                    if (anotacion == null || !anotacion.ignore()) {	                        
 	                        String nombreColumna = campo.getName();
 	                        try {
 	                        	Object valor = rs.getObject(nombreColumna);
 		                        valor = filterValue(valor);
-	                        	campo.set(obj, valor);
+	                        	setFieldValue(campo, obj, valor);
 	                        }catch(Exception e)
 	                        {
 	                        	//e.printStackTrace();
 	                        }
-	                        
-	                        campo.setAccessible(false);
 	                    }
 	                }
 	                
@@ -234,17 +227,15 @@ public class ReflexivePenguin
 			{
 				if(field.getAnnotation(PenguinAttribute.class).penguinKey())
 				{
-					field.setAccessible(true);
 			        try 
 			        {
-						field.set(obj,value);
+						setFieldValue(field, obj, value);
 						
 					} 
-			        catch (IllegalArgumentException | IllegalAccessException e) 
+			        catch (Exception e) 
 			        {
 						e.printStackTrace();
 					}
-			        field.setAccessible(false);
 				}
 			}
 			
@@ -261,17 +252,15 @@ public class ReflexivePenguin
 			{
 				if(field.getAnnotation(PenguinAttribute.class).foreignKey().equals(clazz))
 				{
-					field.setAccessible(true);
 			        try 
 			        {
-						field.set(obj,value);
+						setFieldValue(field, obj, value);
 						
 					} 
-			        catch (IllegalArgumentException | IllegalAccessException e) 
+			        catch (Exception e) 
 			        {
 						e.printStackTrace();
 					}
-			        field.setAccessible(false);
 				}
 			}			
 		}			
@@ -290,6 +279,33 @@ public class ReflexivePenguin
 		// TODO Añadir el valor al atributo relacion jy
 		 
 	}	
+	
+
+    public static Object getFieldValue(Field field, Object object) throws Exception {
+        String getterName = buildGetterName(field);
+        Method getterMethod = object.getClass().getMethod(getterName);
+        return getterMethod.invoke(object);
+    }
+
+    private static String buildGetterName(Field field) {
+        String fieldName = field.getName();
+        String capitalizedFieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+        if(field.getType() == boolean.class){
+            return "is" + capitalizedFieldName;
+        }
+        return "get" + capitalizedFieldName;
+    }
+
+    public static void setFieldValue(Field field, Object object, Object value) throws Exception {
+        String setterName = buildSetterName(field.getName());
+        Method setterMethod = object.getClass().getMethod(setterName, field.getType());
+        setterMethod.invoke(object, value);
+    }
+
+    private static String buildSetterName(String fieldName) {
+        String capitalizedFieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+        return "set" + capitalizedFieldName;
+    }
 }
 	
 

@@ -18,8 +18,9 @@ public class Main {
 
 	public static void main(String[] args) 
 	{
-		//testCrud();
+		
 		try {
+			//testCrud(); // Por ahora ejecutar solo una vez el crud ya que no prueba el delete y genera duplicados no permitidos
 			testRead();
 		} catch (SQLException e) {
 			System.out.println("Error de glaciar");
